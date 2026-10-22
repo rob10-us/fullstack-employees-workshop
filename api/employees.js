@@ -4,8 +4,10 @@ export default router;
 
 import {
   createEmployee,
+  deleteEmployee,
   getEmployee,
   getEmployees,
+  updateEmployee,
 } from "#db/queries/employees";
 
 router.get("/", async (req, res) => {
@@ -37,4 +39,28 @@ router.param("id", async (req, res, next, id) => {
 
 router.get("/:id", (req, res) => {
   res.send(req.employee);
+});
+
+router.delete("/:id", async (req, res) => {
+  await deleteEmployee(req.employee.id);
+  res.sendStatus(204);
+});
+
+router.put("/:id", async (req, res) => {
+  if (!req.body) return res.status(400).send("Request body required");
+
+  const { name, birthday, salary } = req.body;
+  if (!name || !birthday || salary == null) {
+    return res
+      .status(400)
+      .send("Missing required fields: name, birthday, salary");
+  }
+
+  const employee = await updateEmployee({
+    id: req.employee.id,
+    name,
+    birthday,
+    salary,
+  });
+  res.send(employee);
 });
