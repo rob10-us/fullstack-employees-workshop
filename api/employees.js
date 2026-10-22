@@ -2,11 +2,29 @@ import express from "express";
 const router = express.Router();
 export default router;
 
-import { getEmployee, getEmployees } from "#db/queries/employees";
+import {
+  createEmployee,
+  getEmployee,
+  getEmployees,
+} from "#db/queries/employees";
 
 router.get("/", async (req, res) => {
   const employees = await getEmployees();
   res.send(employees);
+});
+
+router.post("/", async (req, res) => {
+  if (!req.body) return res.status(400).send("Request body required");
+
+  const { name, birthday, salary } = req.body;
+  if (!name || !birthday || salary == null) {
+    return res
+      .status(400)
+      .send("Missing required fields: name, birthday, salary");
+  }
+
+  const employee = await createEmployee({ name, birthday, salary });
+  res.status(201).send(employee);
 });
 
 router.param("id", async (req, res, next, id) => {
